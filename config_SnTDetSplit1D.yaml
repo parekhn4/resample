@@ -1,0 +1,94 @@
+paths:
+  base_dir: /eos/uscms/store/group/lpcdihiggsboost/yucao/v7_analysis/Version_20260706_final_test1
+  sample_base: individual_samples
+  model_base: SnT_like_model/epoch_SnTDetSplit1D
+  output_base: /eos/uscms/store/group/lpcdihiggsboost/nparekh/yuxiang_resample/SnTDetSplit1D_model
+model:
+  ext: SnTDetSplit1D
+  n_classes: 4
+  fill_nan: -9
+  batch_size: 65536
+  num_layers: 5
+  num_nodes: 1024
+  act_fn: ELU
+  dropout_prob: 0.25
+  # single model, held-out subset only, K=4 held-out folds {0,2}
+  fold_convention: detsplit_heldout
+  split_k: 4
+  held_out_folds: [0, 2]
+class_names:
+  - is_nonRes_bkg
+  - is_Res_bkg
+  - is_ggHH_sig
+  - is_VBFHH_sig
+resample:
+  signal_sample: GluGlutoHHto2B2G_kl_1p00_kt_1p00_c2_0p00
+  background_samples:
+    - DDQCDGJET
+    - GGJets
+    - TTGG
+  combo_name: mvaID_btag_dijetmass
+  seed: 21
+  presel_cuts:
+    - column: lead_mvaID
+      op: ">"
+      value: -0.7
+    - column: sublead_mvaID
+      op: ">"
+      value: -0.7
+    - column: nonResReg_vbfpair_dijet_mass_DNNreg
+      op: ">"
+      value: 80
+    - column: nonResReg_vbfpair_dijet_mass_DNNreg
+      op: "<"
+      value: 190
+  hist_vars:
+    - name: lead_mvaID
+      bins: 100
+    - name: sublead_mvaID
+      bins: 100
+    - name: nonResReg_vbfpair_dijet_mass_DNNreg
+      bins: 100
+  fixed_vars:
+    value: 1.0
+    columns:
+      - nonResReg_vbfpair_lead_bjet_btag_WP_L
+      - nonResReg_vbfpair_lead_bjet_btag_WP_M
+      - nonResReg_vbfpair_lead_bjet_btag_WP_T
+      - nonResReg_vbfpair_lead_bjet_btag_WP_XT
+      - nonResReg_vbfpair_lead_bjet_btag_WP_XXT
+      - nonResReg_vbfpair_sublead_bjet_btag_WP_L
+      - nonResReg_vbfpair_sublead_bjet_btag_WP_M
+      - nonResReg_vbfpair_sublead_bjet_btag_WP_T
+      - nonResReg_vbfpair_sublead_bjet_btag_WP_XT
+      - nonResReg_vbfpair_sublead_bjet_btag_WP_XXT
+output_vars:
+  - column: mass
+    out_name: diphoton_mass
+  - column: nonResReg_vbfpair_dijet_mass_DNNreg
+    out_name: dijet_mass
+  - column: nonResReg_vbfpair_HHbbggCandidate_mass
+    out_name: HH_mass
+shared_cut: "dijet_mass > 80 & dijet_mass < 190"
+# cfg14 cuts, resolved cats 1-3 tightest-first, no_cut last
+cuts:
+  - name: VBF_HH_Cat
+    expr: "(is_VBFHH_sig >= 0.848)"
+  - name: cat1
+    expr: "(is_ggHH_sig > 0.986733333333) & (is_nonRes_bkg < 0.000213333333) & (is_Res_bkg < 0.002666666667)"
+  - name: cat2
+    expr: "(is_ggHH_sig > 0.91) & (is_nonRes_bkg < 0.000409066667) & (is_Res_bkg < 0.008)"
+  - name: cat3
+    expr: "(is_ggHH_sig > 0.083333333333) & (is_nonRes_bkg < 0.001879933333) & (is_Res_bkg < 0.130533333333)"
+  - name: no_cut
+    expr: null
+plot_vars:
+  - name: diphoton_mass
+    bins: 32
+    range: [100, 180]
+  - name: dijet_mass
+    bins: 32
+    range: [100, 180]
+  - name: HH_mass
+    bins: 45
+    range: [100, 1000]
